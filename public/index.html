@@ -7,7 +7,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <!-- Tailwind CSS -->
@@ -18,110 +18,33 @@
                 extend: {
                     colors: {
                         sable: '#060606',
-                        'sable-light': '#0c0c0c',
-                        'sable-lighter': '#101010',
-                        'sable-dark': '#050505',
-                        accent: '#4d6dd3',
-                        'accent-hover': '#3d5bc0',
-                        success: '#48c774',
-                        warning: '#ffdd57',
-                        danger: '#f14668',
-                        'border-color': '#2a2a2a',
-                        'text-primary': '#ffffff',
-                        'text-secondary': '#a0a0a0',
-                        'text-muted': '#606060',
                     },
                     fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
+                        'roboto': ['Roboto', 'sans-serif'],
                     },
-                    boxShadow: {
-                        'material': '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)',
-                        'material-md': '0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)',
-                        'material-lg': '0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23)',
-                    }
                 }
             }
         }
     </script>
-    <style type="text/tailwindcss">
-        @layer components {
-            .icon-box {
-                @apply flex items-center justify-center w-10 h-10 bg-sable-lighter rounded-md shadow-material;
-            }
-            
-            .card {
-                @apply bg-sable rounded-lg p-6 shadow-material-md border border-border-color mb-6;
-            }
-            
-            .btn {
-                @apply flex items-center justify-center gap-2 px-4 py-2 rounded-md font-semibold transition-all duration-200 shadow-material;
-            }
-            
-            .btn-primary {
-                @apply btn bg-accent text-white hover:bg-accent-hover hover:shadow-material-md;
-            }
-            
-            .btn-danger {
-                @apply btn bg-danger text-white hover:opacity-90 hover:shadow-material-md;
-            }
-            
-            .btn-outline {
-                @apply btn bg-transparent border border-border-color text-text-secondary hover:border-text-primary hover:text-text-primary;
-            }
-            
-            .progress-bar {
-                @apply w-full h-2 bg-border-color rounded-full overflow-hidden;
-            }
-            
-            .progress-fill {
-                @apply h-full bg-accent transition-all duration-300;
-            }
-            
-            .status-badge {
-                @apply inline-flex items-center px-2 py-1 rounded text-sm font-medium;
-            }
-            
-            .status-active {
-                @apply bg-success bg-opacity-20 text-success;
-            }
-            
-            .status-completed {
-                @apply bg-success bg-opacity-20 text-success;
-            }
-            
-            .status-stopped {
-                @apply bg-warning bg-opacity-20 text-warning;
-            }
-            
-            .status-error {
-                @apply bg-danger bg-opacity-20 text-danger;
-            }
-            
-            .form-label {
-                @apply block mb-2 font-medium text-text-secondary;
-            }
-            
-            .form-input {
-                @apply w-full px-3 py-2 bg-sable-lighter border border-border-color rounded-md text-text-primary focus:outline-none focus:border-accent transition duration-200;
-            }
-            
-            .tab-active {
-                @apply text-accent border-b-2 border-accent;
-            }
-            
-            .loader {
-                @apply inline-block w-6 h-6 border-2 border-text-primary border-opacity-30 rounded-full border-t-text-primary animate-spin;
-            }
-            
-            .table-cell {
-                @apply px-3 py-2 border-b border-border-color;
-            }
-            
-            .table-head {
-                @apply px-3 py-2 text-left text-text-secondary border-b border-border-color font-semibold;
-            }
+    <style>
+        body {
+            background-color: #060606;
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
         }
         
+        /* Material Design Elevation Shadows */
+        .elevation-1 {
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        .elevation-2 {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        }
+        .elevation-3 {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        }
+        
+        /* Animations */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -137,6 +60,10 @@
             to { transform: translateX(100%); opacity: 0; }
         }
         
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
@@ -148,51 +75,61 @@
         .animate-fade-out {
             animation: fadeOut 0.3s ease-out forwards;
         }
+        
+        .loader {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 1s ease infinite;
+        }
     </style>
 </head>
-<body class="bg-sable font-sans text-text-primary min-h-screen">
+<body class="min-h-screen">
     <!-- Toast Notifications Container -->
     <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-sm"></div>
 
     <!-- Header -->
-    <header class="bg-sable sticky top-0 z-40 border-b border-border-color shadow-material-md">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between py-4">
+    <header class="sticky top-0 z-40 bg-sable elevation-2">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex items-center justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center gap-3">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-share-network text-xl text-accent"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-share-network text-xl text-[#4d6dd3]"></i>
                     </div>
                     <span class="text-xl font-bold">ShareBoost</span>
                 </div>
                 
                 <!-- Mobile Menu Toggle -->
-                <button id="menuToggle" class="md:hidden text-text-primary">
-                    <i class="ph-fill ph-list text-2xl"></i>
+                <button id="menuToggle" class="md:hidden w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                    <i class="ph-fill ph-list text-xl"></i>
                 </button>
                 
                 <!-- Navigation -->
                 <nav class="hidden md:block">
                     <ul id="navMenu" class="flex gap-6">
                         <li>
-                            <a href="#" class="flex items-center gap-2 py-2 px-1 border-b-2 border-transparent hover:text-text-primary tab-active" data-tab="dashboard">
-                                <div class="icon-box">
-                                    <i class="ph-fill ph-chart-bar"></i>
+                            <a href="#" class="flex items-center gap-2 py-2 px-1 text-white border-b-2 border-[#4d6dd3]" data-tab="dashboard">
+                                <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                                    <i class="ph-fill ph-chart-bar text-[#4d6dd3]"></i>
                                 </div>
                                 <span>Dashboard</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center gap-2 py-2 px-1 border-b-2 border-transparent hover:text-text-primary" data-tab="new-session">
-                                <div class="icon-box">
+                            <a href="#" class="flex items-center gap-2 py-2 px-1 text-[#a0a0a0] border-b-2 border-transparent hover:text-white" data-tab="new-session">
+                                <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
                                     <i class="ph-fill ph-plus"></i>
                                 </div>
                                 <span>New Session</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="flex items-center gap-2 py-2 px-1 border-b-2 border-transparent hover:text-text-primary" data-tab="history">
-                                <div class="icon-box">
+                            <a href="#" class="flex items-center gap-2 py-2 px-1 text-[#a0a0a0] border-b-2 border-transparent hover:text-white" data-tab="history">
+                                <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
                                     <i class="ph-fill ph-clock-counter-clockwise"></i>
                                 </div>
                                 <span>History</span>
@@ -203,27 +140,27 @@
             </div>
             
             <!-- Mobile Navigation Menu -->
-            <div id="mobileMenu" class="md:hidden hidden animate-fade-in">
-                <ul class="py-3 border-t border-border-color">
+            <div id="mobileMenu" class="md:hidden hidden" style="animation: fadeIn 0.3s ease-out forwards;">
+                <ul class="py-3 border-t border-[#2a2a2a]">
                     <li class="py-2">
-                        <a href="#" class="flex items-center gap-2 px-1 hover:text-accent" data-tab="dashboard">
-                            <div class="icon-box">
+                        <a href="#" class="flex items-center gap-2 px-1 hover:text-[#4d6dd3]" data-tab="dashboard">
+                            <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
                                 <i class="ph-fill ph-chart-bar"></i>
                             </div>
                             <span>Dashboard</span>
                         </a>
                     </li>
                     <li class="py-2">
-                        <a href="#" class="flex items-center gap-2 px-1 hover:text-accent" data-tab="new-session">
-                            <div class="icon-box">
+                        <a href="#" class="flex items-center gap-2 px-1 hover:text-[#4d6dd3]" data-tab="new-session">
+                            <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
                                 <i class="ph-fill ph-plus"></i>
                             </div>
                             <span>New Session</span>
                         </a>
                     </li>
                     <li class="py-2">
-                        <a href="#" class="flex items-center gap-2 px-1 hover:text-accent" data-tab="history">
-                            <div class="icon-box">
+                        <a href="#" class="flex items-center gap-2 px-1 hover:text-[#4d6dd3]" data-tab="history">
+                            <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
                                 <i class="ph-fill ph-clock-counter-clockwise"></i>
                             </div>
                             <span>History</span>
@@ -235,62 +172,62 @@
     </header>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6">
+    <main class="max-w-6xl mx-auto px-4 py-6">
         <!-- Dashboard Tab -->
         <div id="dashboard" class="tab-content">
             <!-- Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                 <!-- Active Sessions Stat -->
-                <div class="bg-sable rounded-lg p-4 shadow-material-md border border-border-color flex items-center gap-4">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-activity text-xl text-accent"></i>
+                <div class="bg-sable rounded-lg p-4 border border-[#2a2a2a] flex items-center gap-4 elevation-2">
+                    <div class="w-12 h-12 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-activity text-xl text-[#4d6dd3]"></i>
                     </div>
                     <div>
                         <div id="activeSessionsCount" class="text-3xl font-bold">0</div>
-                        <div class="text-text-secondary text-sm">Active Sessions</div>
+                        <div class="text-[#a0a0a0] text-sm">Active Sessions</div>
                     </div>
                 </div>
                 
                 <!-- Total Shares Stat -->
-                <div class="bg-sable rounded-lg p-4 shadow-material-md border border-border-color flex items-center gap-4">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-share-network text-xl text-accent"></i>
+                <div class="bg-sable rounded-lg p-4 border border-[#2a2a2a] flex items-center gap-4 elevation-2">
+                    <div class="w-12 h-12 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-share-network text-xl text-[#4d6dd3]"></i>
                     </div>
                     <div>
                         <div id="totalSharesCount" class="text-3xl font-bold">0</div>
-                        <div class="text-text-secondary text-sm">Total Shares</div>
+                        <div class="text-[#a0a0a0] text-sm">Total Shares</div>
                     </div>
                 </div>
                 
                 <!-- Completed Sessions Stat -->
-                <div class="bg-sable rounded-lg p-4 shadow-material-md border border-border-color flex items-center gap-4">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-check-circle text-xl text-success"></i>
+                <div class="bg-sable rounded-lg p-4 border border-[#2a2a2a] flex items-center gap-4 elevation-2">
+                    <div class="w-12 h-12 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-check-circle text-xl text-[#48c774]"></i>
                     </div>
                     <div>
                         <div id="completedSessionsCount" class="text-3xl font-bold">0</div>
-                        <div class="text-text-secondary text-sm">Completed Sessions</div>
+                        <div class="text-[#a0a0a0] text-sm">Completed Sessions</div>
                     </div>
                 </div>
                 
                 <!-- Error Sessions Stat -->
-                <div class="bg-sable rounded-lg p-4 shadow-material-md border border-border-color flex items-center gap-4">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-warning-circle text-xl text-danger"></i>
+                <div class="bg-sable rounded-lg p-4 border border-[#2a2a2a] flex items-center gap-4 elevation-2">
+                    <div class="w-12 h-12 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-warning-circle text-xl text-[#f14668]"></i>
                     </div>
                     <div>
                         <div id="errorSessionsCount" class="text-3xl font-bold">0</div>
-                        <div class="text-text-secondary text-sm">Sessions With Errors</div>
+                        <div class="text-[#a0a0a0] text-sm">Sessions With Errors</div>
                     </div>
                 </div>
             </div>
             
             <!-- Active Sessions Card -->
-            <div class="card">
+            <div class="bg-sable rounded-lg p-6 border border-[#2a2a2a] mb-6 elevation-2">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="flex items-center gap-3 text-xl font-semibold">
-                        <div class="icon-box">
-                            <i class="ph-fill ph-activity text-accent"></i>
+                    <h2 class="flex items-center gap-3 text-xl font-medium">
+                        <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                            <i class="ph-fill ph-activity text-[#4d6dd3]"></i>
                         </div>
                         Active Sessions
                     </h2>
@@ -299,11 +236,11 @@
                 <!-- Search and Refresh -->
                 <div class="flex flex-col sm:flex-row gap-3 mb-6">
                     <div class="relative flex-grow">
-                        <i class="ph-fill ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i>
+                        <i class="ph-fill ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#606060]"></i>
                         <input type="text" id="sessionSearch" placeholder="Search sessions by URL or Post ID..." 
-                               class="w-full pl-10 pr-3 py-2 bg-sable-lighter border border-border-color rounded-md text-text-primary focus:outline-none focus:border-accent">
+                               class="w-full pl-10 pr-3 py-3 bg-[#0c0c0c] border border-[#2a2a2a] rounded-md text-white focus:outline-none focus:border-[#4d6dd3] transition-colors">
                     </div>
-                    <button id="refreshSessions" class="btn-outline whitespace-nowrap">
+                    <button id="refreshSessions" class="flex items-center justify-center gap-2 px-4 py-3 bg-transparent border border-[#2a2a2a] rounded-md text-[#a0a0a0] hover:text-white hover:border-white transition-colors elevation-1">
                         <i class="ph-fill ph-arrows-clockwise"></i>
                         Refresh
                     </button>
@@ -313,11 +250,11 @@
                 <div id="activeSessionsTable">
                     <!-- Empty State -->
                     <div id="noSessionsMessage" class="flex flex-col items-center justify-center py-12 text-center">
-                        <div class="flex items-center justify-center w-16 h-16 bg-sable-lighter rounded-full mb-6 shadow-material">
-                            <i class="ph-fill ph-database text-2xl text-text-muted"></i>
+                        <div class="w-16 h-16 flex items-center justify-center bg-[#0c0c0c] rounded-full mb-6 elevation-1">
+                            <i class="ph-fill ph-database text-2xl text-[#606060]"></i>
                         </div>
-                        <p class="text-text-secondary mb-6">No active sessions found</p>
-                        <button id="createFirstSession" class="btn-primary">
+                        <p class="text-[#a0a0a0] mb-6">No active sessions found</p>
+                        <button id="createFirstSession" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#4d6dd3] text-white rounded-md font-medium elevation-1 hover:bg-[#3d5bc0] transition-colors">
                             <i class="ph-fill ph-plus-circle"></i>
                             Create your first sharing session
                         </button>
@@ -325,13 +262,13 @@
                     
                     <!-- Sessions Table -->
                     <div id="sessionsTableContainer" class="hidden overflow-x-auto">
-                        <table id="sessionsTable" class="w-full">
+                        <table id="sessionsTable" class="w-full border-collapse">
                             <thead>
                                 <tr>
-                                    <th class="table-head">Facebook Post</th>
-                                    <th class="table-head">Progress</th>
-                                    <th class="table-head">Status</th>
-                                    <th class="table-head">Actions</th>
+                                    <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Facebook Post</th>
+                                    <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Progress</th>
+                                    <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Status</th>
+                                    <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="sessionsTableBody">
@@ -343,52 +280,52 @@
             </div>
             
             <!-- Session Details Panel -->
-            <div id="sessionDetails" class="card hidden">
-                <h3 class="text-lg font-semibold mb-4">Session Details</h3>
+            <div id="sessionDetails" class="bg-sable rounded-lg p-6 border border-[#2a2a2a] mb-6 elevation-3 hidden">
+                <h3 class="text-lg font-medium mb-4">Session Details</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <div class="text-text-secondary mb-1">Session ID:</div>
+                        <div class="text-[#a0a0a0] mb-1">Session ID:</div>
                         <div id="detailSessionId" class="font-medium break-all"></div>
                     </div>
                     
                     <div>
-                        <div class="text-text-secondary mb-1">Status:</div>
+                        <div class="text-[#a0a0a0] mb-1">Status:</div>
                         <div id="detailStatus"></div>
                     </div>
                     
                     <div class="md:col-span-2">
-                        <div class="text-text-secondary mb-1">Post URL:</div>
+                        <div class="text-[#a0a0a0] mb-1">Post URL:</div>
                         <div id="detailUrl" class="font-medium break-all"></div>
                     </div>
                     
                     <div>
-                        <div class="text-text-secondary mb-1">Post ID:</div>
+                        <div class="text-[#a0a0a0] mb-1">Post ID:</div>
                         <div id="detailPostId" class="font-medium"></div>
                     </div>
                     
                     <div>
-                        <div class="text-text-secondary mb-1">Progress:</div>
+                        <div class="text-[#a0a0a0] mb-1">Progress:</div>
                         <div id="detailProgress" class="font-medium"></div>
                     </div>
                     
                     <div>
-                        <div class="text-text-secondary mb-1">Start Time:</div>
+                        <div class="text-[#a0a0a0] mb-1">Start Time:</div>
                         <div id="detailStartTime" class="font-medium"></div>
                     </div>
                     
                     <div>
-                        <div class="text-text-secondary mb-1">Expected End Time:</div>
+                        <div class="text-[#a0a0a0] mb-1">Expected End Time:</div>
                         <div id="detailEndTime" class="font-medium"></div>
                     </div>
                 </div>
                 
-                <div class="flex gap-3 mt-6">
-                    <button id="stopSessionBtn" class="btn-danger">
+                <div class="flex flex-col sm:flex-row gap-3 mt-6">
+                    <button id="stopSessionBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#f14668] text-white rounded-md font-medium elevation-1 hover:opacity-90 transition-opacity">
                         <i class="ph-fill ph-stop-circle"></i>
                         Stop Session
                     </button>
-                    <button id="closeDetailBtn" class="btn-outline">
+                    <button id="closeDetailBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-transparent border border-[#2a2a2a] rounded-md text-[#a0a0a0] hover:text-white hover:border-white transition-colors elevation-1">
                         <i class="ph-fill ph-x"></i>
                         Close
                     </button>
@@ -398,47 +335,51 @@
 
         <!-- New Session Tab -->
         <div id="new-session" class="tab-content hidden">
-            <div class="card">
+            <div class="bg-sable rounded-lg p-6 border border-[#2a2a2a] mb-6 elevation-2">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-plus-circle text-accent"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-plus-circle text-[#4d6dd3]"></i>
                     </div>
-                    <h2 class="text-xl font-semibold">Start New Share Session</h2>
+                    <h2 class="text-xl font-medium">Start New Share Session</h2>
                 </div>
                 
                 <form id="shareForm">
                     <div class="mb-4">
-                        <label for="fbUrl" class="form-label">Facebook Post URL</label>
+                        <label for="fbUrl" class="block mb-2 text-[#a0a0a0] font-medium">Facebook Post URL</label>
                         <input type="url" id="fbUrl" placeholder="https://www.facebook.com/..." 
-                               class="form-input" required>
+                               class="w-full px-4 py-3 bg-[#0c0c0c] border border-[#2a2a2a] rounded-md text-white focus:outline-none focus:border-[#4d6dd3] transition-colors"
+                               required>
                     </div>
                     
                     <div class="mb-4">
-                        <label for="fbCookie" class="form-label">Facebook Cookies (JSON format)</label>
+                        <label for="fbCookie" class="block mb-2 text-[#a0a0a0] font-medium">Facebook Cookies (JSON format)</label>
                         <textarea id="fbCookie" rows="6" placeholder='[{"key": "sb", "value": "..."}, {"key": "c_user", "value": "..."}, ...]'
-                                  class="form-input" required></textarea>
+                                  class="w-full px-4 py-3 bg-[#0c0c0c] border border-[#2a2a2a] rounded-md text-white focus:outline-none focus:border-[#4d6dd3] transition-colors"
+                                  required></textarea>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
-                            <label for="shareAmount" class="form-label">Number of Shares</label>
+                            <label for="shareAmount" class="block mb-2 text-[#a0a0a0] font-medium">Number of Shares</label>
                             <input type="number" id="shareAmount" min="1" max="1000" value="50"
-                                   class="form-input" required>
+                                   class="w-full px-4 py-3 bg-[#0c0c0c] border border-[#2a2a2a] rounded-md text-white focus:outline-none focus:border-[#4d6dd3] transition-colors"
+                                   required>
                         </div>
                         
                         <div>
-                            <label for="shareInterval" class="form-label">Interval Between Shares (seconds)</label>
+                            <label for="shareInterval" class="block mb-2 text-[#a0a0a0] font-medium">Interval Between Shares (seconds)</label>
                             <input type="number" id="shareInterval" min="5" max="600" value="30"
-                                   class="form-input" required>
+                                   class="w-full px-4 py-3 bg-[#0c0c0c] border border-[#2a2a2a] rounded-md text-white focus:outline-none focus:border-[#4d6dd3] transition-colors"
+                                   required>
                         </div>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-3">
-                        <button type="submit" id="startSharingBtn" class="btn-primary">
+                        <button type="submit" id="startSharingBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#4d6dd3] text-white rounded-md font-medium elevation-1 hover:bg-[#3d5bc0] transition-colors">
                             <i class="ph-fill ph-play"></i>
                             Start Sharing
                         </button>
-                        <button type="reset" class="btn-outline">
+                        <button type="reset" class="flex items-center justify-center gap-2 px-4 py-3 bg-transparent border border-[#2a2a2a] rounded-md text-[#a0a0a0] hover:text-white hover:border-white transition-colors elevation-1">
                             <i class="ph-fill ph-x"></i>
                             Clear Form
                         </button>
@@ -449,21 +390,21 @@
 
         <!-- History Tab -->
         <div id="history" class="tab-content hidden">
-            <div class="card">
+            <div class="bg-sable rounded-lg p-6 border border-[#2a2a2a] mb-6 elevation-2">
                 <div class="flex items-center gap-3 mb-6">
-                    <div class="icon-box">
-                        <i class="ph-fill ph-clock-counter-clockwise text-accent"></i>
+                    <div class="w-10 h-10 flex items-center justify-center bg-[#0c0c0c] rounded-md elevation-1">
+                        <i class="ph-fill ph-clock-counter-clockwise text-[#4d6dd3]"></i>
                     </div>
-                    <h2 class="text-xl font-semibold">Session History</h2>
+                    <h2 class="text-xl font-medium">Session History</h2>
                 </div>
                 
                 <div class="flex flex-col sm:flex-row gap-3 mb-6">
                     <div class="relative flex-grow">
-                        <i class="ph-fill ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"></i>
+                        <i class="ph-fill ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#606060]"></i>
                         <input type="text" id="historySearch" placeholder="Search by URL or Post ID..." 
-                               class="w-full pl-10 pr-3 py-2 bg-sable-lighter border border-border-color rounded-md text-text-primary focus:outline-none focus:border-accent">
+                               class="w-full pl-10 pr-3 py-3 bg-[#0c0c0c] border border-[#2a2a2a] rounded-md text-white focus:outline-none focus:border-[#4d6dd3] transition-colors">
                     </div>
-                    <button id="searchHistoryBtn" class="btn-primary whitespace-nowrap">
+                    <button id="searchHistoryBtn" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#4d6dd3] text-white rounded-md font-medium elevation-1 hover:bg-[#3d5bc0] transition-colors">
                         <i class="ph-fill ph-magnifying-glass"></i>
                         Search
                     </button>
@@ -471,10 +412,10 @@
                 
                 <div id="historyResults">
                     <div class="flex flex-col items-center justify-center py-12 text-center">
-                        <div class="flex items-center justify-center w-16 h-16 bg-sable-lighter rounded-full mb-6 shadow-material">
-                            <i class="ph-fill ph-clock-counter-clockwise text-2xl text-text-muted"></i>
+                        <div class="w-16 h-16 flex items-center justify-center bg-[#0c0c0c] rounded-full mb-6 elevation-1">
+                            <i class="ph-fill ph-clock-counter-clockwise text-2xl text-[#606060]"></i>
                         </div>
-                        <p class="text-text-secondary">No session history found</p>
+                        <p class="text-[#a0a0a0]">No session history found</p>
                     </div>
                 </div>
             </div>
@@ -544,10 +485,19 @@
         function activateTab(tabId) {
             // Update nav links
             elements.navLinks.forEach(link => {
-                if (link.getAttribute('data-tab') === tabId) {
-                    link.classList.add('tab-active');
+                const isActive = link.getAttribute('data-tab') === tabId;
+                
+                // Desktop nav
+                if (isActive) {
+                    link.classList.add('text-white');
+                    link.classList.add('border-[#4d6dd3]');
+                    link.classList.remove('text-[#a0a0a0]');
+                    link.classList.remove('border-transparent');
                 } else {
-                    link.classList.remove('tab-active');
+                    link.classList.remove('text-white');
+                    link.classList.remove('border-[#4d6dd3]');
+                    link.classList.add('text-[#a0a0a0]');
+                    link.classList.add('border-transparent');
                 }
             });
             
@@ -599,7 +549,7 @@
                     <td colspan="4" class="text-center py-8">
                         <div class="flex flex-col items-center">
                             <div class="loader mb-3"></div>
-                            <div class="text-text-secondary">Loading sessions...</div>
+                            <div class="text-[#a0a0a0]">Loading sessions...</div>
                         </div>
                     </td>
                 </tr>
@@ -625,12 +575,12 @@
             // Add session rows
             activeSessions.forEach(session => {
                 const row = document.createElement('tr');
-                row.className = 'hover:bg-sable-lighter transition duration-150';
+                row.className = 'hover:bg-[#0c0c0c] transition-colors';
                 row.setAttribute('data-session-id', session.sessionId);
                 
                 // URL cell
                 const urlCell = document.createElement('td');
-                urlCell.className = 'table-cell';
+                urlCell.className = 'px-3 py-3 border-b border-[#2a2a2a]';
                 urlCell.innerHTML = `
                     <div class="max-w-xs overflow-hidden text-ellipsis">
                         ${session.url}
@@ -639,10 +589,10 @@
                 
                 // Progress cell
                 const progressCell = document.createElement('td');
-                progressCell.className = 'table-cell';
+                progressCell.className = 'px-3 py-3 border-b border-[#2a2a2a]';
                 progressCell.innerHTML = `
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${session.progress}%"></div>
+                    <div class="w-full h-2 bg-[#2a2a2a] rounded-full overflow-hidden">
+                        <div class="h-full bg-[#4d6dd3] transition-all duration-300" style="width: ${session.progress}%"></div>
                     </div>
                     <div class="mt-1 text-sm">
                         ${session.count} / ${session.target} (${session.progress}%)
@@ -651,22 +601,47 @@
                 
                 // Status cell
                 const statusCell = document.createElement('td');
-                statusCell.className = 'table-cell';
+                statusCell.className = 'px-3 py-3 border-b border-[#2a2a2a]';
+                
+                // Status badge styles based on status
+                let badgeClasses = 'inline-flex items-center px-2 py-1 rounded text-sm font-medium';
+                let badgeBgColor = '';
+                let badgeTextColor = '';
+                
+                switch(session.status.toLowerCase()) {
+                    case 'active':
+                        badgeBgColor = 'bg-[#48c774] bg-opacity-20';
+                        badgeTextColor = 'text-[#48c774]';
+                        break;
+                    case 'completed':
+                        badgeBgColor = 'bg-[#48c774] bg-opacity-20';
+                        badgeTextColor = 'text-[#48c774]';
+                        break;
+                    case 'stopped':
+                        badgeBgColor = 'bg-[#ffdd57] bg-opacity-20';
+                        badgeTextColor = 'text-[#ffdd57]';
+                        break;
+                    case 'error':
+                        badgeBgColor = 'bg-[#f14668] bg-opacity-20';
+                        badgeTextColor = 'text-[#f14668]';
+                        break;
+                }
+                
                 statusCell.innerHTML = `
-                    <span class="status-badge status-${session.status.toLowerCase()}">
+                    <span class="${badgeClasses} ${badgeBgColor} ${badgeTextColor}">
                         ${getStatusIcon(session.status)} ${session.status}
                     </span>
                 `;
                 
                 // Actions cell
                 const actionsCell = document.createElement('td');
-                actionsCell.className = 'table-cell';
+                actionsCell.className = 'px-3 py-3 border-b border-[#2a2a2a]';
                 actionsCell.innerHTML = `
                     <div class="flex gap-2">
-                        <button class="view-session btn-outline !p-2">
+                        <button class="view-session flex items-center justify-center w-9 h-9 bg-[#0c0c0c] text-[#a0a0a0] hover:text-white rounded-md transition-colors elevation-1">
                             <i class="ph-fill ph-eye"></i>
                         </button>
-                        <button class="stop-session btn-danger !p-2">
+                        <button class="stop-session flex items-center justify-center w-9 h-9 bg-[#f14668] text-white rounded-md hover:opacity-90 transition-opacity elevation-1 ${session.status.toLowerCase() !== 'active' ? 'opacity-50 cursor-not-allowed' : ''}">
                             <i class="ph-fill ph-stop-circle"></i>
                         </button>
                     </div>
@@ -686,7 +661,9 @@
                 viewButton.addEventListener('click', () => showSessionDetails(session.sessionId));
                 
                 const stopButton = row.querySelector('.stop-session');
-                stopButton.addEventListener('click', () => stopSession(session.sessionId));
+                if (session.status.toLowerCase() === 'active') {
+                    stopButton.addEventListener('click', () => stopSession(session.sessionId));
+                }
                 
                 // Make entire row clickable
                 row.addEventListener('click', (e) => {
@@ -733,16 +710,39 @@
             elements.detailEndTime.textContent = session.estimatedEndTime ? new Date(session.estimatedEndTime).toLocaleString() : 'N/A';
             
             // Status with badge
+            let badgeClasses = 'inline-flex items-center px-2 py-1 rounded text-sm font-medium';
+            let badgeBgColor = '';
+            let badgeTextColor = '';
+            
+            switch(session.status.toLowerCase()) {
+                case 'active':
+                    badgeBgColor = 'bg-[#48c774] bg-opacity-20';
+                    badgeTextColor = 'text-[#48c774]';
+                    break;
+                case 'completed':
+                    badgeBgColor = 'bg-[#48c774] bg-opacity-20';
+                    badgeTextColor = 'text-[#48c774]';
+                    break;
+                case 'stopped':
+                    badgeBgColor = 'bg-[#ffdd57] bg-opacity-20';
+                    badgeTextColor = 'text-[#ffdd57]';
+                    break;
+                case 'error':
+                    badgeBgColor = 'bg-[#f14668] bg-opacity-20';
+                    badgeTextColor = 'text-[#f14668]';
+                    break;
+            }
+            
             elements.detailStatus.innerHTML = `
-                <span class="status-badge status-${session.status.toLowerCase()}">
+                <span class="${badgeClasses} ${badgeBgColor} ${badgeTextColor}">
                     ${getStatusIcon(session.status)} ${session.status}
                 </span>
             `;
             
             // Progress with bar
             elements.detailProgress.innerHTML = `
-                <div class="progress-bar mt-1">
-                    <div class="progress-fill" style="width: ${session.progress}%"></div>
+                <div class="w-full h-2 bg-[#2a2a2a] rounded-full overflow-hidden mt-1">
+                    <div class="h-full bg-[#4d6dd3] transition-all duration-300" style="width: ${session.progress}%"></div>
                 </div>
                 <div class="mt-1 text-sm">
                     ${session.count} / ${session.target} (${session.progress}%)
@@ -751,7 +751,7 @@
             
             // Show details panel with animation
             elements.sessionDetails.classList.remove('hidden');
-            elements.sessionDetails.classList.add('animate-fade-in');
+            elements.sessionDetails.style.animation = 'fadeIn 0.3s ease-out forwards';
             
             // Update stop button state
             if (session.status.toLowerCase() === 'active') {
@@ -866,10 +866,10 @@
         
         // Close session details panel
         function closeSessionDetails() {
-            elements.sessionDetails.classList.add('animate-fade-out');
+            elements.sessionDetails.style.animation = 'fadeOut 0.3s ease-out forwards';
             setTimeout(() => {
                 elements.sessionDetails.classList.add('hidden');
-                elements.sessionDetails.classList.remove('animate-fade-out');
+                elements.sessionDetails.style.animation = '';
                 state.selectedSessionId = null;
             }, 300);
         }
@@ -879,7 +879,7 @@
             try {
                 // Disable form
                 elements.startSharingBtn.disabled = true;
-                elements.startSharingBtn.innerHTML = '<div class="loader"></div> Starting...';
+                elements.startSharingBtn.innerHTML = '<div class="loader mr-2"></div> Starting...';
                 
                 // Get form values
                 const url = elements.fbUrl.value;
@@ -939,27 +939,26 @@
             } finally {
                 // Re-enable form
                 elements.startSharingBtn.disabled = false;
-                elements.startSharingBtn.innerHTML = '<i class="ph-fill ph-play"></i> Start Sharing';
+                elements.startSharingBtn.innerHTML = '<i class="ph-fill ph-play mr-1"></i> Start Sharing';
             }
         }
         
         // Show toast notification
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = `flex items-start gap-2 p-4 rounded-md shadow-material-md animate-slide-in ${
-                type === 'success' ? 'bg-success text-white' : 'bg-danger text-white'
-            }`;
+            toast.className = `flex items-start gap-2 p-4 rounded-md ${type === 'success' ? 'bg-[#48c774]' : 'bg-[#f14668]'} text-white elevation-2`;
+            toast.style.animation = 'slideIn 0.3s ease-out forwards';
             
             const icon = type === 'success' 
                 ? '<i class="ph-fill ph-check-circle text-xl"></i>' 
                 : '<i class="ph-fill ph-x-circle text-xl"></i>';
             
             toast.innerHTML = `
-                <div class="flex-grow">
+                <div class="flex-grow flex items-start gap-2">
                     ${icon}
-                    <div class="mt-1">${message}</div>
+                    <div class="mt-px">${message}</div>
                 </div>
-                <button class="text-white opacity-70 hover:opacity-100">
+                <button class="text-white opacity-70 hover:opacity-100 transition-opacity">
                     <i class="ph-fill ph-x"></i>
                 </button>
             `;
@@ -969,7 +968,7 @@
             // Add event listener to close button
             const closeButton = toast.querySelector('button');
             closeButton.addEventListener('click', () => {
-                toast.classList.add('animate-fade-out');
+                toast.style.animation = 'fadeOut 0.3s ease-out forwards';
                 setTimeout(() => {
                     if (elements.toasts.contains(toast)) {
                         elements.toasts.removeChild(toast);
@@ -980,7 +979,7 @@
             // Auto-close after 5 seconds
             setTimeout(() => {
                 if (elements.toasts.contains(toast)) {
-                    toast.classList.add('animate-fade-out');
+                    toast.style.animation = 'fadeOut 0.3s ease-out forwards';
                     setTimeout(() => {
                         if (elements.toasts.contains(toast)) {
                             elements.toasts.removeChild(toast);
@@ -1025,7 +1024,7 @@
                 elements.historyResults.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-12">
                         <div class="loader mb-4"></div>
-                        <div class="text-text-secondary">Searching...</div>
+                        <div class="text-[#a0a0a0]">Searching...</div>
                     </div>
                 `;
                 
@@ -1045,10 +1044,10 @@
             if (count === 0) {
                 elements.historyResults.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-12 text-center">
-                        <div class="flex items-center justify-center w-16 h-16 bg-sable-lighter rounded-full mb-6 shadow-material">
-                            <i class="ph-fill ph-magnifying-glass text-2xl text-text-muted"></i>
+                        <div class="w-16 h-16 flex items-center justify-center bg-[#0c0c0c] rounded-full mb-6 elevation-1">
+                            <i class="ph-fill ph-magnifying-glass text-2xl text-[#606060]"></i>
                         </div>
-                        <p class="text-text-secondary">No results found for "${term}"</p>
+                        <p class="text-[#a0a0a0]">No results found for "${term}"</p>
                     </div>
                 `;
                 return;
@@ -1058,40 +1057,64 @@
             let html = `
                 <div class="mb-4">Found ${count} result(s) for "${term}"</div>
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full border-collapse">
                         <thead>
                             <tr>
-                                <th class="table-head">Post URL</th>
-                                <th class="table-head">Progress</th>
-                                <th class="table-head">Status</th>
-                                <th class="table-head">Start Time</th>
+                                <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Post URL</th>
+                                <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Progress</th>
+                                <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Status</th>
+                                <th class="px-3 py-3 text-left text-[#a0a0a0] font-medium border-b border-[#2a2a2a]">Start Time</th>
                             </tr>
                         </thead>
                         <tbody>
             `;
             
             results.forEach(session => {
+                // Status badge styles
+                let badgeClasses = 'inline-flex items-center px-2 py-1 rounded text-sm font-medium';
+                let badgeBgColor = '';
+                let badgeTextColor = '';
+                
+                switch(session.status.toLowerCase()) {
+                    case 'active':
+                        badgeBgColor = 'bg-[#48c774] bg-opacity-20';
+                        badgeTextColor = 'text-[#48c774]';
+                        break;
+                    case 'completed':
+                        badgeBgColor = 'bg-[#48c774] bg-opacity-20';
+                        badgeTextColor = 'text-[#48c774]';
+                        break;
+                    case 'stopped':
+                        badgeBgColor = 'bg-[#ffdd57] bg-opacity-20';
+                        badgeTextColor = 'text-[#ffdd57]';
+                        break;
+                    case 'error':
+                        badgeBgColor = 'bg-[#f14668] bg-opacity-20';
+                        badgeTextColor = 'text-[#f14668]';
+                        break;
+                }
+                
                 html += `
-                    <tr class="hover:bg-sable-lighter transition duration-150">
-                        <td class="table-cell">
+                    <tr class="hover:bg-[#0c0c0c] transition-colors">
+                        <td class="px-3 py-3 border-b border-[#2a2a2a]">
                             <div class="max-w-xs overflow-hidden text-ellipsis">
                                 ${session.url}
                             </div>
                         </td>
-                        <td class="table-cell">
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: ${session.progress}%"></div>
+                        <td class="px-3 py-3 border-b border-[#2a2a2a]">
+                            <div class="w-full h-2 bg-[#2a2a2a] rounded-full overflow-hidden">
+                                <div class="h-full bg-[#4d6dd3] transition-all duration-300" style="width: ${session.progress}%"></div>
                             </div>
                             <div class="mt-1 text-sm">
                                 ${session.count} / ${session.target} (${session.progress}%)
                             </div>
                         </td>
-                        <td class="table-cell">
-                            <span class="status-badge status-${session.status.toLowerCase()}">
+                        <td class="px-3 py-3 border-b border-[#2a2a2a]">
+                            <span class="${badgeClasses} ${badgeBgColor} ${badgeTextColor}">
                                 ${getStatusIcon(session.status)} ${session.status}
                             </span>
                         </td>
-                        <td class="table-cell">
+                        <td class="px-3 py-3 border-b border-[#2a2a2a]">
                             ${new Date(session.startTime).toLocaleString()}
                         </td>
                     </tr>
