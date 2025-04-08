@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.urlencoded({ extended: true })); // Support form data
+app.use(express.urlencoded({ extended: true }));
 
 // Store active sharing sessions
 const activeSessions = new Map();
@@ -117,9 +117,6 @@ app.post('/api/share', async (req, res) => {
 /**
  * Stop an active sharing session
  */
-/**
- * Stop an active sharing session
- */
 app.post('/api/stop', (req, res) => {
   const { sessionId } = req.body;
   
@@ -198,314 +195,6 @@ app.get('/api/find-by-post/:postId', (req, res) => {
     return res.status(500).json({ error: 'Failed to find sessions' });
   }
 });
-
-/**
- * Start a Facebook post sharing session
- * @param {string} cookies - Facebook cookies
- * @param {string} url - Facebook post URL
- * @param {number} amount - Number of shares to perform
- * @param {number} interval - Interval between shares in seconds
- * @returns {string} - Session ID
- */
-async function startSharingSession(cookies, url, amount, interval) {
-  // Extract post ID from URL
-  const postId = await getPostID(url);
-  
-  if (!postId) {
-    throw new Error("Unable to get post ID: invalid URL or the post might be private/friends-only");
-  }
-  
-  // Get Facebook access token
-  const accessToken = await getAccessToken(cookies);
-  
-  if (!accessToken) {
-    throw new Error("Failed to obtain Facebook access token. Please check your cookies.");
-  }
-  
-  // Generate unique session ID
-  const sessionId = `${postId}_${Date.now()}`;
-  
-  // Calculate estimated end time
-  const estimatedEndTime = new Date(Date.now() + (amount * interval * 1000));
-  
-  // Create session object
-  const sessionData = {
-    url,
-    postId,
-    count: 0,
-    target: amount,
-    status: 'active',
-    startTime: new Date(),
-    estimatedEndTime,
-    timer: null
-  };
-  
-  // Store in main sessions map
-  activeSessions.set(sessionId, sessionData);
-  
-  // Update search indexes
-  if (!searchIndex.byPostId.has(postId)) {
-    searchIndex.byPostId.set(postId, new Set());
-  }
-  searchIndex.byPostId.get(postId).add(sessionId);
-  
-  // Index URL (normalized to lowercase)
-  const normalizedUrl = url.toLowerCase();
-  if (!searchIndex.byUrl.has(normalizedUrl)) {
-    searchIndex.byUrl.set(normalizedUrl, new Set());
-  }
-  searchIndex.byUrl.get(normalizedUrl).add(sessionId);
-  
-  // Prepare request headers
-  const headers = {
-    'accept': '*/*',
-    'accept-encoding': 'gzip, deflate',
-    'connection': 'keep-alive',
-    'content-length': '0',
-    'cookie': cookies,
-    'host': 'graph.facebook.com'
-  };
-  
-  // Sharing function
-  async function sharePost() {
-    const session = activeSessions.get(sessionId);
-    
-    // Check if session still exists or has been manually stopped
-    if (!session || session.status !== 'active') {
-      clearInterval(timer);
-      return;
-    }
-    
-    try {
-      const response = await axios.post(
-        `https://graph.facebook.com/me/feed?link=https://m.facebook.com/${postId}&published=0&access_token=${accessToken}`, 
-        {}, 
-        { headers }
-      );
-      
-      if (response.status === 200) {
-        // Update session count
-        session.count += 1;
-        activeSessions.set(sessionId, session);
-        
-        logger.success(`Session ${sessionId}: Share ${session.count}/${session.target} completed`);
-        
-        // Check if target reached
-        if (session.count >= session.target) {
-          clearInterval(timer);
-          session.status = 'completed';
-          activeSessions.set(sessionId, session);
-          logger.info(`Session ${sessionId} completed: ${session.count} shares done`);
-          
-          // Clean up session after 1 hour
-          setTimeout(() => {
-            // Clean up search indexes
-            const session = activeSessions.get(sessionId);
-            if (session) {
-              // Remove from postId index
-              if (searchIndex.byPostId.has(session.postId)) {
-                searchIndex.byPostId.get(session.postId).delete(sessionId);
-                if (searchIndex.byPostId.get(session.postId).size === 0) {
-                  searchIndex.byPostId.delete(session.postId);
-                }
-              }
-              
-              // Remove from URL index
-              const normalizedUrl = session.url.toLowerCase();
-              if (searchIndex.byUrl.has(normalizedUrl)) {
-                searchIndex.byUrl.get(normalizedUrl).delete(sessionId);
-                if (searchIndex.byUrl.get(normalizedUrl).size === 0) {
-                  searchIndex.byUrl.delete(normalizedUrl);
-                }
-              }
-            }
-            
-            // Remove from active sessions
-            activeSessions.delete(sessionId);
-            logger.info(`Session ${sessionId} removed from active sessions`);
-          }, 3600000);
-        }
-      } else {
-        logger.error(`Share failed with status ${response.status}`);
-      }
-    } catch (error) {
-      // Update session status
-      session.status = 'error';
-      session.error = error.message;
-      activeSessions.set(sessionId, session);
-      
-      logger.error(`Sharing error in session ${sessionId}: ${error.message}`);
-      clearInterval(timer);
-    }
-  }
-  
-  // Start periodic sharing
-  const timer = setInterval(sharePost, interval * 1000);
-  activeSessions.get(sessionId).timer = timer;
-  
-  // Safety timeout to prevent hanging sessions
-  const safetyTimeout = setTimeout(() => {
-    const session = activeSessions.get(sessionId);
-    if (session && session.status === 'active') {
-      clearInterval(session.timer);
-      session.status = 'timeout';
-      activeSessions.set(sessionId, session);
-      logger.info(`Session ${sessionId} safety timeout triggered`);
-      
-      // Clean up session after 1 hour
-      setTimeout(() => {
-        // Clean up search indexes
-        const session = activeSessions.get(sessionId);
-        if (session) {
-          // Remove from postId index
-          if (searchIndex.byPostId.has(session.postId)) {
-            searchIndex.byPostId.get(session.postId).delete(sessionId);
-            if (searchIndex.byPostId.get(session.postId).size === 0) {
-              searchIndex.byPostId.delete(session.postId);
-            }
-          }
-          
-          // Remove from URL index
-          const normalizedUrl = session.url.toLowerCase();
-          if (searchIndex.byUrl.has(normalizedUrl)) {
-            searchIndex.byUrl.get(normalizedUrl).delete(sessionId);
-            if (searchIndex.byUrl.get(normalizedUrl).size === 0) {
-              searchIndex.byUrl.delete(normalizedUrl);
-            }
-          }
-        }
-        
-        // Remove from active sessions
-        activeSessions.delete(sessionId);
-        logger.info(`Session ${sessionId} removed from active sessions after timeout`);
-      }, 3600000);
-    }
-  }, (amount * interval * 1000) + 300000); // Add 5 minutes safety margin
-  
-  return sessionId;
-}
-
-/**
- * Extract Facebook post ID from URL
- * @param {string} url - Facebook post URL
- * @returns {string|null} Post ID or null if not found
- */
-async function getPostID(url) {
-  try {
-    const response = await axios.post(
-      'https://id.traodoisub.com/api.php', 
-      `link=${encodeURIComponent(url)}`, 
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        timeout: 10000 // 10 seconds timeout
-      }
-    );
-    
-    if (response.data && response.data.id) {
-      return response.data.id;
-    }
-    return null;
-  } catch (error) {
-    logger.error(`Error getting post ID: ${error.message}`);
-    return null;
-  }
-}
-
-/**
- * Extract Facebook access token from cookies
- * @param {string} cookie - Facebook cookies
- * @returns {string|null} Access token or null if not found
- */
-async function getAccessToken(cookie) {
-  try {
-    const headers = {
-      'authority': 'business.facebook.com',
-      'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-      'accept-language': 'en-US,en;q=0.9',
-      'cache-control': 'max-age=0',
-      'cookie': cookie,
-      'referer': 'https://www.facebook.com/',
-      'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"Linux"',
-      'sec-fetch-dest': 'document',
-      'sec-fetch-mode': 'navigate',
-      'sec-fetch-site': 'same-origin',
-      'sec-fetch-user': '?1',
-      'upgrade-insecure-requests': '1',
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    };
-    
-    const response = await axios.get('https://business.facebook.com/content_management', {
-      headers,
-      timeout: 15000 // 15 seconds timeout
-    });
-    
-    const tokenMatch = response.data.match(/"accessToken":\s*"([^"]+)"/);
-    if (tokenMatch && tokenMatch[1]) {
-      return tokenMatch[1];
-    }
-    
-    // Alternative token extraction pattern if the first one fails
-    const altTokenMatch = response.data.match(/accessToken="([^"]+)"/);
-    if (altTokenMatch && altTokenMatch[1]) {
-      return altTokenMatch[1];
-    }
-    
-    logger.error('Access token not found in Facebook response');
-    return null;
-  } catch (error) {
-    logger.error(`Error getting access token: ${error.message}`);
-    return null;
-  }
-}
-
-/**
- * Convert cookie from JSON format to string format
- * @param {string} cookie - Cookie in JSON format
- * @returns {Promise<string>} Cookie in string format
- */
-async function convertCookie(cookie) {
-  return new Promise((resolve, reject) => {
-    try {
-      // Check if cookie is already in string format
-      if (typeof cookie === 'string' && cookie.includes('=')) {
-        resolve(cookie);
-        return;
-      }
-      
-      // Parse JSON format cookies
-      const cookies = JSON.parse(cookie);
-      
-      // Validate cookie format
-      if (!Array.isArray(cookies)) {
-        reject("Invalid cookie format: expected array");
-        return;
-      }
-      
-      // Find essential sb cookie
-      const sbCookie = cookies.find(cookie => cookie.key === "sb");
-      if (!sbCookie) {
-        reject("Missing essential 'sb' cookie");
-        return;
-      }
-      
-      // Convert to string format
-      const cookieString = `sb=${sbCookie.value}; ${
-        cookies
-          .filter(cookie => cookie.key !== "sb")
-          .map(cookie => `${cookie.key}=${cookie.value}`)
-          .join('; ')
-      }`;
-      
-      resolve(cookieString);
-    } catch (error) {
-      reject(`Error processing cookies: ${error.message}`);
-    }
-  });
-}
 
 /**
  * Dedicated search endpoint for posts with efficient index-based search
@@ -599,6 +288,389 @@ app.get('/api/search', (req, res) => {
     res.status(500).json({ error: 'Search operation failed' });
   }
 });
+
+/**
+ * Start a Facebook post sharing session
+ * @param {string} cookies - Facebook cookies
+ * @param {string} url - Facebook post URL
+ * @param {number} amount - Number of shares to perform
+ * @param {number} interval - Interval between shares in seconds
+ * @returns {string} - Session ID
+ */
+async function startSharingSession(cookies, url, amount, interval) {
+  try {
+    // Extract post ID from URL with safeguards
+    let postId;
+    try {
+      postId = await getPostID(url);
+    } catch (e) {
+      logger.error(`Error getting post ID: ${e.message}`);
+      throw new Error("Unable to get post ID: invalid URL or the post might be private/friends-only");
+    }
+    
+    if (!postId) {
+      throw new Error("Unable to get post ID: invalid URL or the post might be private/friends-only");
+    }
+    
+    // Generate unique session ID
+    const sessionId = `${postId}_${Date.now()}`;
+    
+    // Calculate estimated end time
+    const estimatedEndTime = new Date(Date.now() + (amount * interval * 1000));
+    
+    // Create session object
+    const sessionData = {
+      url,
+      postId,
+      count: 0,
+      target: amount,
+      status: 'active',
+      startTime: new Date(),
+      estimatedEndTime,
+      timer: null
+    };
+    
+    // Store in main sessions map
+    activeSessions.set(sessionId, sessionData);
+    
+    // Update search indexes
+    if (!searchIndex.byPostId.has(postId)) {
+      searchIndex.byPostId.set(postId, new Set());
+    }
+    searchIndex.byPostId.get(postId).add(sessionId);
+    
+    // Index URL (normalized to lowercase)
+    const normalizedUrl = url.toLowerCase();
+    if (!searchIndex.byUrl.has(normalizedUrl)) {
+      searchIndex.byUrl.set(normalizedUrl, new Set());
+    }
+    searchIndex.byUrl.get(normalizedUrl).add(sessionId);
+    
+    // Get Facebook access token - with safe error handling for Render
+    let accessToken;
+    try {
+      accessToken = await getAccessToken(cookies);
+    } catch (e) {
+      logger.error(`Error getting access token: ${e.message}`);
+      // Cleanup session on token error
+      cleanupSession(sessionId);
+      throw new Error("Failed to obtain Facebook access token. Please check your cookies.");
+    }
+    
+    if (!accessToken) {
+      // Cleanup session on token error
+      cleanupSession(sessionId);
+      throw new Error("Failed to obtain Facebook access token. Please check your cookies.");
+    }
+    
+    // Prepare request headers
+    const headers = {
+      'accept': '*/*',
+      'accept-encoding': 'gzip, deflate',
+      'connection': 'keep-alive',
+      'content-length': '0',
+      'cookie': cookies,
+      'host': 'graph.facebook.com',
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    };
+    
+    // Sharing function with safety checks
+    async function sharePost() {
+      const session = activeSessions.get(sessionId);
+      
+      // Check if session still exists or has been manually stopped
+      if (!session || session.status !== 'active') {
+        clearInterval(timer);
+        return;
+      }
+      
+      try {
+        // Use a 10-second timeout for API call to prevent hanging requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const response = await axios.post(
+          `https://graph.facebook.com/me/feed?link=https://m.facebook.com/${postId}&published=0&access_token=${accessToken}`, 
+          {}, 
+          { 
+            headers,
+            signal: controller.signal 
+          }
+        ).finally(() => clearTimeout(timeoutId));
+        
+        if (response.status === 200) {
+          // Update session count
+          session.count += 1;
+          activeSessions.set(sessionId, session);
+          
+          logger.success(`Session ${sessionId}: Share ${session.count}/${session.target} completed`);
+          
+          // Check if target reached
+          if (session.count >= session.target) {
+            clearInterval(timer);
+            session.status = 'completed';
+            activeSessions.set(sessionId, session);
+            logger.info(`Session ${sessionId} completed: ${session.count} shares done`);
+            
+            // Clean up session after 1 hour
+            setTimeout(() => {
+              // Clean up search indexes
+              const session = activeSessions.get(sessionId);
+              if (session) {
+                // Remove from postId index
+                if (searchIndex.byPostId.has(session.postId)) {
+                  searchIndex.byPostId.get(session.postId).delete(sessionId);
+                  if (searchIndex.byPostId.get(session.postId).size === 0) {
+                    searchIndex.byPostId.delete(session.postId);
+                  }
+                }
+                
+                // Remove from URL index
+                const normalizedUrl = session.url.toLowerCase();
+                if (searchIndex.byUrl.has(normalizedUrl)) {
+                  searchIndex.byUrl.get(normalizedUrl).delete(sessionId);
+                  if (searchIndex.byUrl.get(normalizedUrl).size === 0) {
+                    searchIndex.byUrl.delete(normalizedUrl);
+                  }
+                }
+              }
+              
+              // Remove from active sessions
+              activeSessions.delete(sessionId);
+              logger.info(`Session ${sessionId} removed from active sessions`);
+            }, 3600000);
+          }
+        } else {
+          logger.error(`Share failed with status ${response.status}`);
+        }
+      } catch (error) {
+        // Update session status and record error
+        session.status = 'error';
+        session.error = error.message;
+        activeSessions.set(sessionId, session);
+        
+        logger.error(`Sharing error in session ${sessionId}: ${error.message}`);
+        clearInterval(timer);
+      }
+    }
+    
+    // Start periodic sharing with a safe maximum
+    const safeInterval = Math.max(5, interval); // Ensure interval is at least 5 seconds
+    const timer = setInterval(sharePost, safeInterval * 1000);
+    activeSessions.get(sessionId).timer = timer;
+    
+    // Safety timeout to prevent hanging sessions (max 2 hours or calculated duration + 5 min)
+    const maxDuration = Math.min(7200000, (amount * interval * 1000) + 300000);
+    setTimeout(() => {
+      const session = activeSessions.get(sessionId);
+      if (session && session.status === 'active') {
+        clearInterval(session.timer);
+        session.status = 'timeout';
+        activeSessions.set(sessionId, session);
+        logger.info(`Session ${sessionId} safety timeout triggered`);
+        
+        // Clean up session after 1 hour
+        setTimeout(() => {
+          cleanupSession(sessionId);
+        }, 3600000);
+      }
+    }, maxDuration);
+    
+    return sessionId;
+  } catch (error) {
+    logger.error(`Failed to start sharing session: ${error.message}`);
+    return null;
+  }
+}
+
+// Helper function to cleanup session
+function cleanupSession(sessionId) {
+  const session = activeSessions.get(sessionId);
+  if (!session) return;
+  
+  // Remove from indexes
+  if (session.postId && searchIndex.byPostId.has(session.postId)) {
+    searchIndex.byPostId.get(session.postId).delete(sessionId);
+    if (searchIndex.byPostId.get(session.postId).size === 0) {
+      searchIndex.byPostId.delete(session.postId);
+    }
+  }
+  
+  if (session.url) {
+    const normalizedUrl = session.url.toLowerCase();
+    if (searchIndex.byUrl.has(normalizedUrl)) {
+      searchIndex.byUrl.get(normalizedUrl).delete(sessionId);
+      if (searchIndex.byUrl.get(normalizedUrl).size === 0) {
+        searchIndex.byUrl.delete(normalizedUrl);
+      }
+    }
+  }
+  
+  // Clear timer if exists
+  if (session.timer) {
+    clearInterval(session.timer);
+  }
+  
+  // Remove from active sessions
+  activeSessions.delete(sessionId);
+}
+
+/**
+ * Extract Facebook post ID from URL
+ * @param {string} url - Facebook post URL
+ * @returns {string|null} Post ID or null if not found
+ */
+async function getPostID(url) {
+  try {
+    // Simple URL validation
+    if (!url || !url.includes('facebook.com')) {
+      return null;
+    }
+    
+    // Using a public API to extract Facebook ID
+    const response = await axios.post(
+      'https://id.traodoisub.com/api.php', 
+      `link=${encodeURIComponent(url)}`, 
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        timeout: 10000 // 10 seconds timeout
+      }
+    );
+    
+    if (response.data && response.data.id) {
+      return response.data.id;
+    }
+    
+    return null;
+  } catch (error) {
+    logger.error(`Error getting post ID: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Extract Facebook access token from cookies
+ * @param {string} cookie - Facebook cookies
+ * @returns {string|null} Access token or null if not found
+ */
+async function getAccessToken(cookie) {
+  try {
+    // On Render, we need to handle this carefully to avoid permission issues
+    
+    // Simplified approach - attempt to extract token patterns from cookie
+    // This might not work for all cases but avoids external requests that might be blocked
+    
+    // Attempt to find common token patterns in cookie string
+    const eaabPattern = /(?:EAAB[a-zA-Z0-9]+)/;
+    const eaagPattern = /(?:EAAG[a-zA-Z0-9]+)/; 
+    const eaaiPattern = /(?:EAAI[a-zA-Z0-9]+)/;
+    
+    const eaabMatch = cookie.match(eaabPattern);
+    const eaagMatch = cookie.match(eaagPattern);
+    const eaaiMatch = cookie.match(eaaiPattern);
+    
+    if (eaabMatch && eaabMatch[0]) return eaabMatch[0];
+    if (eaagMatch && eaagMatch[0]) return eaagMatch[0];
+    if (eaaiMatch && eaaiMatch[0]) return eaaiMatch[0];
+    
+    // If no token found in cookie directly, fallback to Facebook API attempt
+    // This might be blocked on some hosting providers
+    if (process.env.ALLOW_FB_API_FETCH === 'true') {
+      try {
+        const headers = {
+          'authority': 'business.facebook.com',
+          'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'max-age=0',
+          'cookie': cookie,
+          'referer': 'https://www.facebook.com/',
+          'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+          'sec-ch-ua-mobile': '?0',
+          'sec-ch-ua-platform': '"Linux"',
+          'sec-fetch-dest': 'document',
+          'sec-fetch-mode': 'navigate',
+          'sec-fetch-site': 'same-origin',
+          'sec-fetch-user': '?1',
+          'upgrade-insecure-requests': '1',
+          'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+        };
+        
+        const response = await axios.get('https://business.facebook.com/content_management', {
+          headers,
+          timeout: 15000 // 15 seconds timeout
+        });
+        
+        const tokenMatch = response.data.match(/"accessToken":\s*"([^"]+)"/);
+        if (tokenMatch && tokenMatch[1]) {
+          return tokenMatch[1];
+        }
+        
+        // Alternative token extraction pattern if the first one fails
+        const altTokenMatch = response.data.match(/accessToken="([^"]+)"/);
+        if (altTokenMatch && altTokenMatch[1]) {
+          return altTokenMatch[1];
+        }
+      } catch (error) {
+        logger.error(`FB API fetch error: ${error.message}`);
+        // We'll continue to try other methods
+      }
+    }
+    
+    // Return null if we couldn't find a token
+    logger.error('Access token not found in Facebook cookies');
+    return null;
+  } catch (error) {
+    logger.error(`Error getting access token: ${error.message}`);
+    return null;
+  }
+}
+
+/**
+ * Convert cookie from JSON format to string format
+ * @param {string} cookie - Cookie in JSON format
+ * @returns {Promise<string>} Cookie in string format
+ */
+async function convertCookie(cookie) {
+  return new Promise((resolve, reject) => {
+    try {
+      // Check if cookie is already in string format
+      if (typeof cookie === 'string' && cookie.includes('=')) {
+        resolve(cookie);
+        return;
+      }
+      
+      // Parse JSON format cookies
+      const cookies = JSON.parse(cookie);
+      
+      // Validate cookie format
+      if (!Array.isArray(cookies)) {
+        reject("Invalid cookie format: expected array");
+        return;
+      }
+      
+      // Find essential sb cookie
+      const sbCookie = cookies.find(cookie => cookie.key === "sb");
+      if (!sbCookie) {
+        reject("Missing essential 'sb' cookie");
+        return;
+      }
+      
+      // Convert to string format
+      const cookieString = `sb=${sbCookie.value}; ${
+        cookies
+          .filter(cookie => cookie.key !== "sb")
+          .map(cookie => `${cookie.key}=${cookie.value}`)
+          .join('; ')
+      }`;
+      
+      resolve(cookieString);
+    } catch (error) {
+      reject(`Error processing cookies: ${error.message}`);
+    }
+  });
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
